@@ -1,7 +1,7 @@
 # Project_Aibby_By_ShibaS
-=====================
+
 Aibby es un asistente personal de IA modular y escalable basado en Gemini API, con interfaz gráfica, reconocimiento de voz y búsqueda de archivos inteligente.
-=====================
+
 Características
 Interfaz gráfica con Tkinter
 Chat de voz (grabación y reproducción)
