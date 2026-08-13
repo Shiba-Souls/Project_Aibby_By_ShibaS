@@ -164,7 +164,7 @@ WINDOW_HEIGHT = 650
 
 ## 📄 Licencia
 
-Uso personal. Made with ❤️ for Ezequiel.
+By ShibaSouls w Cloude
 
 ---
 
