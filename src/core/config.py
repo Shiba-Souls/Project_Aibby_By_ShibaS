@@ -13,7 +13,7 @@ class Config:
         )
     
     # Modelos de Gemini
-    MODELO_PRINCIPAL = "gemini-3.5-flash"
+    MODELO_PRINCIPAL = "gemini-3.6-flash"
     MODELO_LIGERO = "gemini-3.1-flash-lite"
     
     # Configuración de Whisper

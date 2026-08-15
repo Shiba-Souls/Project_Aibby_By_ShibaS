@@ -8,7 +8,7 @@ Aibby/
 └── src/                          # Código fuente de la aplicación
     ├── __init__.py
     │
-    ├── core/                     # Lógica principal del Aibby
+    ├── core/                     # Lógica principal de Aibby
     │   ├── __init__.py
     │   ├── config.py             # Carga y gestión de configuraciones del sistema
     │   ├── cerebr_ai.py           # Módulo central de procesamiento y toma de decisiones de Aibby
