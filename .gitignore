@@ -6,7 +6,7 @@ api_key.env
 venv/
 __pycache__/
 
-# Modelos locales y temporales (como Whisper o audios de prueba)
+# Archivos temp residuales
 *.pt
 temp_*.wav
 *.wav

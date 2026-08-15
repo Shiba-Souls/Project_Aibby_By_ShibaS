@@ -10,7 +10,7 @@ from src.core.person_ai import PersonAI
 
 class AICall:
     def __init__(self):
-        self.client = genai.Client(api_key=Config.API_KEY)
+        self.client = genai.Client(api_key=Config.obtener_api_key())
         self.modelo_actual = Config.MODELO_PRINCIPAL
         self.modelo_lock = threading.Lock()
         
@@ -24,7 +24,6 @@ class AICall:
         # Callbacks (se los inyectará la UI más adelante para no mezclar código)
         self.on_model_change = None 
         self.on_cooldown = None
-
     def _crear_chat(self, modelo, historial=None):
         """Crea una sesión de chat nueva conservando el historial si existe."""
         return self.client.chats.create(

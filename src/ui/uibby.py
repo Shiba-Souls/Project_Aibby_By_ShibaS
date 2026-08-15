@@ -1,15 +1,16 @@
 import threading
 import time
 import customtkinter as ctk
+from src.core.cerebr_ai import CerebrAI
 
 # Configuramos el tema general
-ctk.set_appearance_mode("Dark")  # Usa "Dark" o "System"
+ctk.set_appearance_mode("Dark")  
 ctk.set_default_color_theme("blue") 
 
-class UibbyApp(ctk.CTk):
-    def __init__(self, cerebro):
+class Uibby(ctk.CTk):
+    def __init__(self):
         super().__init__()
-        self.cerebro = cerebro
+        self.cerebro = CerebrAI()
         self.grabando_mic = False
         
         # Configuración de la ventana

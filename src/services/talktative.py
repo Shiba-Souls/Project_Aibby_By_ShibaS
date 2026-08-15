@@ -5,10 +5,12 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 import whisper
 import pygame
+import torch
 from google import genai
 from google.genai import types
 
 from src.core.config import Config
+torch.backends.mkldnn.enabled = False
 
 class Talktative:
     def __init__(self):
@@ -26,7 +28,7 @@ class Talktative:
         self.stream = None
         
         # 3. Configuración de GenAI TTS
-        self.client = genai.Client(api_key=Config.API_KEY)
+        self.client = genai.Client(api_key=Config.obtener_api_key())
         self.tts_lock = threading.Lock()
         
         # Inicializamos pygame para reproducir el audio de forma invisible
