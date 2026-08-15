@@ -1,1 +1,0 @@
-Aibby assistent by ShibaSouls
