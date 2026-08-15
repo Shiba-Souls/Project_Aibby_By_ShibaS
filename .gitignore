@@ -1,0 +1,12 @@
+# Archivos de entorno y credenciales
+.env
+api_key.env
+
+# Entornos virtuales de Python
+venv/
+__pycache__/
+
+# Modelos locales y temporales (como Whisper o audios de prueba)
+*.pt
+temp_*.wav
+*.wav

@@ -1,0 +1,32 @@
+Aibby assistent by ShibaSouls
+Aibby/
+│
+├── .env                          # API KEY que da vida a Aibby
+├── requirements.txt              # Lista de librerías y dependencias de Python
+├── main.py                       # Punto de entrada principal para ejecutar a la asistente
+│
+└── src/                          # Código fuente de la aplicación
+    ├── __init__.py
+    │
+    ├── core/                     # Lógica principal del Aibby
+    │   ├── __init__.py
+    │   ├── config.py             # Carga y gestión de configuraciones del sistema
+    │   ├── cerebr_ai.py           # Módulo central de procesamiento y toma de decisiones de Aibby
+    │   └── person_ai.py           # Definición de la personalidad y rol del asistente
+    │
+    ├── models/                   # Modelos de datos y estructuras
+    │   ├── __init__.py
+    │   └── intent.py             # Definición e interpretación de intenciones del usuario
+    │
+    ├── services/                 # Servicios externos e integraciones
+    │   ├── __init__.py
+    │   ├── ai_call.py            # configuracion y llamadas a la API de GenIA
+    │   └── talktative.py         # Manejo de voz/audio tanto del usuario como de Aibby 
+    │
+    ├── utils/                    # Herramientas y utilidades del sistema
+    │   ├── __init__.py
+    │   ├── file_manager.py  # Funciones para buscar, abrir, leer o modificar carpetas y archivos locales
+    │
+    └── ui/                       # Interfaz de usuario
+        ├── __init__.py
+        └── uibby.py              # Interfaz gráfica del Aibby
