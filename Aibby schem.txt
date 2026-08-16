@@ -29,5 +29,5 @@ Aibby/
     │
     └── ui/                       # Interfaz de usuario (CustomTkinter)[cite: 5]
         ├── __init__.py
-        ├── setup_ui.py           # NUEVO: Ventana de configuración inicial (First-Run Setup) para validar y guardar la API Key
+        ├── setup_ui.py           # Ventana de configuración inicial (First-Run Setup) para validar y guardar la API Key
         └── uibby.py              # Interfaz gráfica principal de Aibby (instancia su propio cerebro)[cite: 5]
