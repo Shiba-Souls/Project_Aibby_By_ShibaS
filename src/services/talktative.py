@@ -14,15 +14,29 @@ torch.backends.mkldnn.enabled = False
 
 class Talktative:
     def __init__(self):
-        # 1. Configurar FFmpeg y Whisper Local
-        os.environ["PATH"] += os.pathsep + os.getcwd()
+        # --- RUTA ABSOLUTA PARA PYINSTALLER ---
+        import sys
+        if getattr(sys, 'frozen', False):
+            self.ruta_base = os.path.dirname(sys.executable)
+        else:
+            self.ruta_base = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+        # 1. Configurar FFmpeg y Whisper Local usando la ruta absoluta
+        os.environ["PATH"] += os.pathsep + self.ruta_base
         
-        # Cargamos el modelo apuntando al archivo base.pt local
-        print("Cargando modelo Whisper (base.pt)...")
-        self.whisper_model = whisper.load_model("base.pt")
+        # Cargamos el modelo apuntando al archivo base.pt exacto
+        ruta_modelo_whisper = os.path.join(self.ruta_base, "base.pt")
+        print(f"Cargando modelo Whisper desde: {ruta_modelo_whisper}")
+        
+        # Si no existe el modelo, evitamos que la app se rompa (útil para el primer inicio)
+        if not os.path.exists(ruta_modelo_whisper):
+            print("⚠️ ADVERTENCIA: No se encontró base.pt. El micrófono no funcionará hasta descargarlo.")
+            self.whisper_model = None
+        else:
+            self.whisper_model = whisper.load_model(ruta_modelo_whisper)
         
         # 2. Configuración de grabación
-        self.sample_rate = 16000
+        self.sample_rate = Config.SAMPLE_RATE  # 16000 Hz, antes hardcodeado mal en 1600
         self.grabando = False
         self.frames = []
         self.stream = None
@@ -61,7 +75,11 @@ class Talktative:
         
         if not self.frames:
             return ""
-        
+
+        if self.whisper_model is None:
+            print("⚠️ No se puede transcribir: falta el modelo Whisper (base.pt).")
+            return ""
+
         # Unimos los fragmentos y guardamos un wav temporal
         audio_data = np.concatenate(self.frames, axis=0)
         archivo_temp = "temp_mic.wav"

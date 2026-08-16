@@ -17,6 +17,12 @@ EXTENSIONES_RELEVANTES = {
     ".zip", ".rar", ".7z",
 }
 
+# Extensiones que SÍ se pueden abrir y leer como texto plano sin parser especial
+EXTENSIONES_TEXTO_PLANO = {
+    ".txt", ".csv", ".md", ".log", ".json", ".xml",
+    ".py", ".js", ".html", ".css", ".ini", ".cfg", ".yaml", ".yml"
+}
+
 FILE_ATTRIBUTE_HIDDEN = 0x2
 FILE_ATTRIBUTE_SYSTEM = 0x4
 DRIVE_REMOVABLE = 2
@@ -123,12 +129,85 @@ class FileManager:
 
     @staticmethod
     def leer_archivo(ruta):
-        """Lee el contenido de un archivo de texto/código."""
+        """Lee el contenido de un archivo, usando el parser adecuado según su extensión."""
+        if not os.path.exists(ruta):
+            return False, "El archivo no existe."
+
+        ext = os.path.splitext(ruta)[1].lower()
+
         try:
-            with open(ruta, 'r', encoding='utf-8', errors='ignore') as f:
-                return True, f.read()
+            if ext == ".docx":
+                return FileManager._leer_docx(ruta)
+            elif ext == ".pdf":
+                return FileManager._leer_pdf(ruta)
+            elif ext in (".xlsx", ".xls"):
+                return FileManager._leer_xlsx(ruta)
+            elif ext in EXTENSIONES_TEXTO_PLANO:
+                with open(ruta, 'r', encoding='utf-8', errors='ignore') as f:
+                    return True, f.read()
+            else:
+                return False, f"Todavía no sé leer el contenido de archivos {ext}."
+        except ModuleNotFoundError as e:
+            libreria = str(e).split("'")[1] if "'" in str(e) else str(e)
+            return False, f"Falta instalar una librería para leer {ext}: pip install {libreria}"
         except Exception as e:
             return False, f"No pude leer el archivo: {e}"
+
+    @staticmethod
+    def _leer_docx(ruta):
+        """Extrae texto (párrafos + tablas) de un Word .docx."""
+        from docx import Document
+
+        doc = Document(ruta)
+        partes = [p.text for p in doc.paragraphs if p.text.strip()]
+
+        for tabla in doc.tables:
+            for fila in tabla.rows:
+                for celda in fila.cells:
+                    if celda.text.strip():
+                        partes.append(celda.text)
+
+        texto = "\n".join(partes)
+        if not texto.strip():
+            return False, "El documento Word está vacío o no tiene texto extraíble."
+        return True, texto
+
+    @staticmethod
+    def _leer_pdf(ruta):
+        """Extrae texto de un PDF, página por página."""
+        from pypdf import PdfReader
+
+        lector = PdfReader(ruta)
+        partes = []
+        for pagina in lector.pages:
+            texto_pagina = pagina.extract_text()
+            if texto_pagina:
+                partes.append(texto_pagina)
+
+        texto = "\n".join(partes)
+        if not texto.strip():
+            return False, "No pude extraer texto de este PDF (puede ser un escaneo/imagen sin OCR)."
+        return True, texto
+
+    @staticmethod
+    def _leer_xlsx(ruta):
+        """Extrae el contenido de todas las hojas de un Excel."""
+        from openpyxl import load_workbook
+
+        wb = load_workbook(ruta, data_only=True, read_only=True)
+        partes = []
+        for nombre_hoja in wb.sheetnames:
+            hoja = wb[nombre_hoja]
+            partes.append(f"--- Hoja: {nombre_hoja} ---")
+            for fila in hoja.iter_rows(values_only=True):
+                valores = [str(v) for v in fila if v is not None]
+                if valores:
+                    partes.append(" | ".join(valores))
+
+        texto = "\n".join(partes)
+        if not texto.strip():
+            return False, "El archivo Excel está vacío."
+        return True, texto
 
     @staticmethod
     def escribir_archivo(ruta, contenido):

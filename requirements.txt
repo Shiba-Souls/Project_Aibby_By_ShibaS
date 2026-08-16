@@ -7,3 +7,6 @@ numpy
 pygame
 python-dotenv
 torch
+python-docx
+pypdf
+openpyxl

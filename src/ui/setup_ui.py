@@ -1,8 +1,11 @@
 import customtkinter as ctk
 import os
+import sys 
 import threading
+import time
 import webbrowser  # <-- NUEVO IMPORT PARA ABRIR LINKS
 from google import genai
+from src.core.config import Config
 
 class SetupWindow(ctk.CTk):
     def __init__(self):
@@ -110,24 +113,69 @@ class SetupWindow(ctk.CTk):
         threading.Thread(target=self._probar_conexion, args=(clave,), daemon=True).start()
 
     def _probar_conexion(self, clave):
+        # --- PASO 1: Validar la API key contra Gemini ---
         try:
-            # Prueba liviana para verificar autenticación
             client = genai.Client(api_key=clave)
             client.models.generate_content(
-                model='gemini-2.5-flash',
+                model=Config.MODELO_LIGERO,
                 contents='ping'
             )
-            
-            # Si responde con éxito, guardamos en el .env y cerramos
-            with open(".env", "w") as f:
-                f.write(f"GEMINI_API_KEY={clave}\n")
-            
-            self.destroy()
-
-        except Exception:
-            # Si la clave es errónea o no hay internet, rehabilitamos los controles
+        except Exception as e:
+            self._log_error("Falló la validación de la API key", e)
             self.btn_guardar.configure(state="normal", text="Validar y Guardar")
-            self.label_estado.configure(
-                text="API Key no válida o error de red. Verifícala.", 
-                text_color="red"
-            )
+
+            mensaje_error = str(e)
+            if "429" in mensaje_error and "RESOURCE_EXHAUSTED" in mensaje_error:
+                self.label_estado.configure(
+                    text="La clave es válida, pero se agotó la cuota gratuita de hoy. Probá de nuevo más tarde.",
+                    text_color="orange"
+                )
+            else:
+                self.label_estado.configure(
+                    text="API Key no válida o error de red. Verifícala.",
+                    text_color="red"
+                )
+            return
+
+        # --- PASO 2: Guardar el .env (con reintentos por si OneDrive/antivirus
+        # tiene el archivo bloqueado momentáneamente, algo común en carpetas sincronizadas) ---
+        if getattr(sys, 'frozen', False):
+            ruta_base = os.path.dirname(sys.executable)
+        else:
+            ruta_base = os.getcwd()
+
+        archivo_env = os.path.join(ruta_base, ".env")
+
+        ultimo_error = None
+        for intento in range(4):  # hasta 4 intentos: ~0.3s, 0.6s, 1.2s de espera
+            try:
+                with open(archivo_env, "w") as f:
+                    f.write(f"GEMINI_API_KEY={clave}\n")
+                self.destroy()
+                return
+            except (PermissionError, OSError) as e:
+                ultimo_error = e
+                if intento < 3:
+                    time.sleep(0.3 * (intento + 1))
+
+        # Si después de reintentar sigue fallando, ahí sí lo reportamos
+        self._log_error(f"La API key es válida, pero falló al escribir el .env en {ruta_base}", ultimo_error)
+        self.btn_guardar.configure(state="normal", text="Validar y Guardar")
+        self.label_estado.configure(
+            text="La clave es válida, pero no pude guardarla (¿OneDrive/antivirus bloqueando la carpeta?).",
+            text_color="red"
+        )
+
+    def _log_error(self, contexto, excepcion):
+        """Escribe el error real a un archivo de log, porque en un .exe con ventana
+        (--windowed) los print() no se ven en ningún lado."""
+        try:
+            if getattr(sys, 'frozen', False):
+                ruta_base = os.path.dirname(sys.executable)
+            else:
+                ruta_base = os.getcwd()
+            ruta_log = os.path.join(ruta_base, "aibby_setup_error.log")
+            with open(ruta_log, "a", encoding="utf-8") as f:
+                f.write(f"[{contexto}] {type(excepcion).__name__}: {excepcion}\n")
+        except Exception:
+            pass  # Si ni el log se puede escribir, no hay nada más que hacer acá
