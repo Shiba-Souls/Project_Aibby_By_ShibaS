@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import os
-import sys 
+import sys  # <-- FALTABA: lo usa _probar_conexion para detectar modo .exe
 import threading
 import time
 import webbrowser  # <-- NUEVO IMPORT PARA ABRIR LINKS
@@ -122,19 +122,18 @@ class SetupWindow(ctk.CTk):
             )
         except Exception as e:
             self._log_error("Falló la validación de la API key", e)
-            self.btn_guardar.configure(state="normal", text="Validar y Guardar")
 
             mensaje_error = str(e)
             if "429" in mensaje_error and "RESOURCE_EXHAUSTED" in mensaje_error:
-                self.label_estado.configure(
-                    text="La clave es válida, pero se agotó la cuota gratuita de hoy. Probá de nuevo más tarde.",
-                    text_color="orange"
-                )
+                self.after(0, lambda: self._mostrar_error(
+                    "La clave es válida, pero se agotó la cuota gratuita de hoy. Probá de nuevo más tarde.",
+                    "orange"
+                ))
             else:
-                self.label_estado.configure(
-                    text="API Key no válida o error de red. Verifícala.",
-                    text_color="red"
-                )
+                self.after(0, lambda: self._mostrar_error(
+                    "API Key no válida o error de red. Verifícala.",
+                    "red"
+                ))
             return
 
         # --- PASO 2: Guardar el .env (con reintentos por si OneDrive/antivirus
@@ -151,7 +150,11 @@ class SetupWindow(ctk.CTk):
             try:
                 with open(archivo_env, "w") as f:
                     f.write(f"GEMINI_API_KEY={clave}\n")
-                self.destroy()
+                # IMPORTANTE: destroy() debe ejecutarse en el hilo principal de Tkinter.
+                # Llamarlo directo desde este hilo secundario podía corromper el root
+                # de Tk y disparar "Too early to use font: no default root window"
+                # más adelante, al crear la ventana de Uibby.
+                self.after(0, self.destroy)
                 return
             except (PermissionError, OSError) as e:
                 ultimo_error = e
@@ -160,11 +163,16 @@ class SetupWindow(ctk.CTk):
 
         # Si después de reintentar sigue fallando, ahí sí lo reportamos
         self._log_error(f"La API key es válida, pero falló al escribir el .env en {ruta_base}", ultimo_error)
+        self.after(0, lambda: self._mostrar_error(
+            "La clave es válida, pero no pude guardarla (¿OneDrive/antivirus bloqueando la carpeta?).",
+            "red"
+        ))
+
+    def _mostrar_error(self, texto, color):
+        """Reactiva el botón y muestra un mensaje de error. Debe llamarse SIEMPRE
+        vía self.after() desde el hilo principal, nunca directo desde el hilo de red."""
         self.btn_guardar.configure(state="normal", text="Validar y Guardar")
-        self.label_estado.configure(
-            text="La clave es válida, pero no pude guardarla (¿OneDrive/antivirus bloqueando la carpeta?).",
-            text_color="red"
-        )
+        self.label_estado.configure(text=texto, text_color=color)
 
     def _log_error(self, contexto, excepcion):
         """Escribe el error real a un archivo de log, porque en un .exe con ventana
