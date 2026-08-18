@@ -17,6 +17,14 @@ class Config:
         
         return os.getenv("GEMINI_API_KEY") or os.getenv("API_KEY")
 
+    @staticmethod
+    def obtener_ruta_recurso(nombre_archivo):
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            return os.path.join(sys._MEIPASS, nombre_archivo)
+        else:
+            ruta_base = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            return os.path.join(ruta_base, nombre_archivo)
+
     # Modelos de Gemini
     MODELO_PRINCIPAL = "gemini-3.6-flash"
     MODELO_LIGERO = "gemini-3.1-flash-lite"

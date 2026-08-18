@@ -36,7 +36,7 @@ class Talktative:
             self.whisper_model = whisper.load_model(ruta_modelo_whisper)
         
         # 2. Configuración de grabación
-        self.sample_rate = Config.SAMPLE_RATE  # 16000 Hz, antes hardcodeado mal en 1600
+        self.sample_rate = Config.SAMPLE_RATE  
         self.grabando = False
         self.frames = []
         self.stream = None
@@ -113,7 +113,7 @@ class Talktative:
                         speech_config=types.SpeechConfig(
                             voice_config=types.VoiceConfig(
                                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                    voice_name="Aoede"  # Voces geniales: Aoede, Puck, Charon, Kore
+                                    voice_name="Kore"  # Voces geniales: Aoede, Puck, Charon, Kore
                                 )
                             )
                         )

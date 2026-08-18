@@ -16,6 +16,12 @@ class SetupWindow(ctk.CTk):
         self.resizable(False, False)
         self.eval('tk::PlaceWindow . center')
 
+        # Ícono de la ventana
+        try:
+            self.iconbitmap(Config.obtener_ruta_recurso("aibby.ico"))
+        except Exception as e:
+            print(f"No se pudo cargar el ícono: {e}")
+
         # Título
         self.label_titulo = ctk.CTkLabel(
             self, text="¡Bienvenido a Aibby!", 

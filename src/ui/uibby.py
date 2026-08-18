@@ -2,6 +2,7 @@ import threading
 import time
 import customtkinter as ctk
 from src.core.cerebr_ai import CerebrAI
+from src.core.config import Config
 
 # Configuramos el tema general
 ctk.set_appearance_mode("Dark")  
@@ -16,6 +17,12 @@ class Uibby(ctk.CTk):
         # Configuración de la ventana
         self.title("Aibby - Asistente Personal de IA")
         self.geometry("600x700")
+
+        # Ícono de la ventana
+        try:
+            self.iconbitmap(Config.obtener_ruta_recurso("aibby.ico"))
+        except Exception as e:
+            print(f"No se pudo cargar el ícono: {e}")
         
         # Conectar callbacks del servicio IA a la UI
         self.cerebro.ai_service.on_model_change = self.evento_cambio_modelo
