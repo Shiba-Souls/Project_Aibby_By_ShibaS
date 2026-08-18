@@ -36,7 +36,7 @@ class Talktative:
             self.whisper_model = whisper.load_model(ruta_modelo_whisper)
         
         # 2. Configuración de grabación
-        self.sample_rate = Config.SAMPLE_RATE  
+        self.sample_rate = Config.SAMPLE_RATE  # 16000 Hz, antes hardcodeado mal en 1600
         self.grabando = False
         self.frames = []
         self.stream = None
@@ -45,8 +45,18 @@ class Talktative:
         self.client = genai.Client(api_key=Config.obtener_api_key())
         self.tts_lock = threading.Lock()
         
-        # Inicializamos pygame para reproducir el audio de forma invisible
-        pygame.mixer.init()
+        # Inicializamos pygame para reproducir el audio de forma invisible.
+        # Si la PC no tiene un dispositivo de audio activo (sin parlantes/auriculares,
+        # o audio deshabilitado en Windows), pygame.mixer.init() tira pygame.error
+        # (ej: "WASAPI can't find requested audio endpoint"). No dejamos que esto
+        # tire abajo toda la app: Aibby sigue funcionando por texto, solo sin voz.
+        self.audio_disponible = True
+        try:
+            pygame.mixer.init()
+        except pygame.error as e:
+            self.audio_disponible = False
+            print(f"⚠️ No se pudo inicializar el audio (sin dispositivo de salida?): {e}")
+            print("⚠️ Aibby va a funcionar sin voz (TTS deshabilitado).")
 
     # --- PARTE 1: OÍDOS (Speech to Text con Whisper) ---
 
@@ -101,6 +111,9 @@ class Talktative:
         """Usa GenAI para generar la voz de Aibby y la reproduce."""
         if not texto:
             return
+
+        if not self.audio_disponible:
+            return  # Sin dispositivo de audio: no tiene sentido ni llamar a la API de TTS
             
         with self.tts_lock:
             try:
@@ -113,7 +126,7 @@ class Talktative:
                         speech_config=types.SpeechConfig(
                             voice_config=types.VoiceConfig(
                                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                    voice_name="Kore"  # Voces geniales: Aoede, Puck, Charon, Kore
+                                    voice_name="Aoede"  # Voces geniales: Aoede, Puck, Charon, Kore
                                 )
                             )
                         )

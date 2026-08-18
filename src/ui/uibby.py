@@ -18,7 +18,7 @@ class Uibby(ctk.CTk):
         self.title("Aibby - Asistente Personal de IA")
         self.geometry("600x700")
 
-        # Ícono de la ventana
+        # Ícono de la ventana (no rompe la app si falta, solo se pierde el ícono)
         try:
             self.iconbitmap(Config.obtener_ruta_recurso("aibby.ico"))
         except Exception as e:
@@ -33,6 +33,17 @@ class Uibby(ctk.CTk):
         self.cooldown_hasta = 0.0
 
         self._crear_widgets()
+
+        # Si no hay dispositivo de audio en este equipo, avisamos en el chat
+        # (en el .exe compilado con --windowed los print() de talktative.py
+        # no se ven en ningún lado, así que esta es la única forma de que el
+        # usuario se entere de por qué no escucha respuestas).
+        if not self.cerebro.audio_service.audio_disponible:
+            self.mostrar_mensaje(
+                "Sistema",
+                "🔇 No se detectó un dispositivo de audio en este equipo. "
+                "Aibby va a funcionar normalmente por texto, pero sin respuestas habladas."
+            )
 
     def _crear_widgets(self):
         # --- Etiquetas de Estado ---
