@@ -22,6 +22,7 @@ Aibby/
     │   ├── __init__.py
     │   ├── ai_call.py            # Configuración y llamadas a la API de GenIA (Gemini) con manejo de cuotas[cite: 5]
     │   └── talktative.py         # Manejo de voz/audio (Whisper local optimizado para CPU y TTS de GenAI)[cite: 5]
+    │   └── talktative.py         # Nueva forma de hablar de Aibby sin requerir de la API de GenAI
     │
     ├── utils/                    # Herramientas y utilidades del sistema[cite: 5]
     │   ├── __init__.py

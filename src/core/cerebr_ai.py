@@ -3,11 +3,13 @@ from src.services.ai_call import AICall
 from src.utils.file_manager import FileManager
 from src.models.intent import Intent
 from src.services.talktative import Talktative
+from src.services.paiper_tts import PaiperTTS
 
 class CerebrAI:
     def __init__(self):
-        self.ai_service = AICall()
-        self.audio_service = Talktative()
+        self.ai_service = AICall()          # texto -> texto (Gemini, solo texto)
+        self.audio_service = Talktative()   # audio -> texto (Whisper, oídos)
+        self.tts_service = PaiperTTS()      # texto -> audio (Piper, voz)
         self.ultimos_archivos_encontrados = []
 
     def procesar_mensaje(self, mensaje):

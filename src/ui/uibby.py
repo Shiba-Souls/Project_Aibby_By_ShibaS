@@ -38,7 +38,7 @@ class Uibby(ctk.CTk):
         # (en el .exe compilado con --windowed los print() de talktative.py
         # no se ven en ningún lado, así que esta es la única forma de que el
         # usuario se entere de por qué no escucha respuestas).
-        if not self.cerebro.audio_service.audio_disponible:
+        if not self.cerebro.tts_service.audio_disponible:
             self.mostrar_mensaje(
                 "Sistema",
                 "🔇 No se detectó un dispositivo de audio en este equipo. "
@@ -137,8 +137,8 @@ class Uibby(ctk.CTk):
             # Mostramos el texto en pantalla
             self.after(0, lambda: self.mostrar_mensaje("Aibby", respuesta))
             
-            # Reproducimos el audio de GenAI
-            self.cerebro.audio_service.decir(respuesta)
+            # Reproducimos el audio con Piper (local)
+            self.cerebro.tts_service.decir(respuesta)
             
         except Exception as e:
             self.after(0, lambda: self.mostrar_mensaje("Sistema", f"Error crítico: {str(e)}"))
